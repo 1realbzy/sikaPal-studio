@@ -1,0 +1,30 @@
+diff --git a/node_modules/@genkit-ai/core/lib/schema.js b/node_modules/@genkit-ai/core/lib/schema.js
+index 7a7e6af..d12f4c5 100644
+--- a/node_modules/@genkit-ai/core/lib/schema.js
++++ b/node_modules/@genkit-ai/core/lib/schema.js
+@@ -76,7 +76,9 @@ function toJsonSchema({
+   if (!jsonSchema && !schema) return null;
+   if (jsonSchema) return jsonSchema;
+   if (jsonSchemas.has(schema)) return jsonSchemas.get(schema);
+-  const outSchema = (0, import_zod_to_json_schema.default)(schema, {
++  // zod-to-json-schema 3.x misreads Zod 4 schemas (it emits `{type:"string"}`).
++  // Zod 4.6+ can emit draft-07, which is what this Ajv instance compiles.
++  const outSchema = schema && schema._zod && typeof import_zod.z.toJSONSchema === "function" ? import_zod.z.toJSONSchema(schema, { target: "draft-07" }) : (0, import_zod_to_json_schema.default)(schema, {
+     $refStrategy: "none",
+     removeAdditionalStrategy: "strict"
+   });
+diff --git a/node_modules/@genkit-ai/core/lib/schema.mjs b/node_modules/@genkit-ai/core/lib/schema.mjs
+index c0e0c9d..2e50bd3 100644
+--- a/node_modules/@genkit-ai/core/lib/schema.mjs
++++ b/node_modules/@genkit-ai/core/lib/schema.mjs
+@@ -37,7 +37,9 @@ function toJsonSchema({
+   if (!jsonSchema && !schema) return null;
+   if (jsonSchema) return jsonSchema;
+   if (jsonSchemas.has(schema)) return jsonSchemas.get(schema);
+-  const outSchema = zodToJsonSchema(schema, {
++  // zod-to-json-schema 3.x misreads Zod 4 schemas (it emits `{type:"string"}`).
++  // Zod 4.6+ can emit draft-07, which is what this Ajv instance compiles.
++  const outSchema = schema && schema._zod && typeof z.toJSONSchema === "function" ? z.toJSONSchema(schema, { target: "draft-07" }) : zodToJsonSchema(schema, {
+     $refStrategy: "none",
+     removeAdditionalStrategy: "strict"
+   });
